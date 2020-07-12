@@ -6,8 +6,8 @@ exports.logout = () => {
 
 }
 
-exports.register = () => {
-
+exports.register = (req, res) => {
+  res.send('thanks for trying to register')
 }
 
 exports.home = (req, res) => {
