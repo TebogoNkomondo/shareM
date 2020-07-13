@@ -1,3 +1,4 @@
+const bycrypt = require('bcryptjs')
 const validator = require('validator')
 const usersCollection = require('../db').collection('users')
 const User = function (data) {
@@ -33,7 +34,7 @@ User.prototype.login = function () {
   return new Promise((resolve, reject) => {
     this.cleanUp()
     usersCollection.findOne({ username: this.data.username }).then((attemptedUser) => {
-      if (attemptedUser && attemptedUser.password === this.data.password) {
+      if (attemptedUser && bycrypt.compareSync(this.data.password, attemptedUser.password)) {
         resolve('successful login')
       } else {
         reject('invalid username/password')
@@ -50,6 +51,8 @@ User.prototype.register = function () {
   this.validate()
   // only if there are no validation errors, then save user data into DB
   if (!this.errors.length) {
+    const salt = bycrypt.genSaltSync(10)
+    this.data.password = bycrypt.hashSync(this.data.password, salt)
     usersCollection.insertOne(this.data)
   }
 }
