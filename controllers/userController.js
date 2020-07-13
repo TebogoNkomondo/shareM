@@ -23,19 +23,25 @@ exports.logout = (req, res) => {
 
 exports.register = (req, res) => {
   const user = new User(req.body)
-  user.register()
-  if (user.errors.length > 0) {
-    res.send(user.errors)
-  } else {
-    res.send('congrats')
-  }
+  user.register().then(() => {
+    req.session.user = { username: user.data.username }
+    req.session.save(() => {
+      res.redirect('/')
+    })
+  }).catch((regErrors) => {
+    regErrors.forEach((error) => {
+      req.flash('regErrors', error)
+    })
+    req.session.save(() => {
+      res.redirect('/')
+    })
+  })
 }
 
 exports.home = (req, res) => {
   if (req.session.user) {
     res.render('home-dashboard', { username: req.session.user.username })
   } else {
-    const myMessage = req.flash('messages')
-    res.render('home-guest', { messages: myMessage })
+    res.render('home-guest', { messages: req.flash('messages'), regErrors: req.flash('regErrors') })
   }
 }
