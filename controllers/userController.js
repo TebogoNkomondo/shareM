@@ -2,8 +2,10 @@ const User = require('../models/User')
 
 exports.login = (req, res) => {
   const user = new User(req.body)
-  user.login((result) => {
+  user.login().then((result) => {
     res.send(result)
+  }).catch((e) => {
+    res.send(e)
   })
 }
 
