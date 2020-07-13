@@ -1,4 +1,5 @@
 const validator = require('validator')
+const usersCollection = require('../db').collection('users')
 const User = function (data) {
   this.data = data
   this.errors = []
@@ -32,7 +33,10 @@ User.prototype.register = function () {
 // validate user data
   this.cleanUp()
   this.validate()
-// only if there are no validation errors, then save user data into DB
+  // only if there are no validation errors, then save user data into DB
+  if (!this.errors.length) {
+    usersCollection.insertOne(this.data)
+  }
 }
 
 module.exports = User
