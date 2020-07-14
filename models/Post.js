@@ -44,4 +44,19 @@ Post.prototype.create = function () {
   })
 }
 
+Post.findSingleById = (id) => {
+  return new Promise(async (resolve, reject) => {
+    if (typeof (id) !== 'string' || !ObjectID.isValid(id)) {
+      reject()
+      return
+    }
+    const post = await postsCollection.findOne({ _id: ObjectID(id) })
+    if (post) {
+      resolve(post)
+    } else {
+      reject()
+    }
+  })
+}
+
 module.exports = Post
