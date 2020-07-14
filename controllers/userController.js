@@ -51,7 +51,7 @@ exports.register = (req, res) => {
 
 exports.home = (req, res) => {
   if (req.session.user) {
-    res.render('home-dashboard', { username: req.session.user.username, avatar: req.session.user.avatar })
+    res.render('home-dashboard')
   } else {
     res.render('home-guest', { messages: req.flash('messages'), regErrors: req.flash('regErrors') })
   }
