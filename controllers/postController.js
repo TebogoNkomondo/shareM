@@ -5,7 +5,7 @@ exports.viewCreateScreen = (req, res) => {
 }
 
 exports.create = (req, res) => {
-  const post = new Post(req.body)
+  const post = new Post(req.body, req.session.user._id)
   post.create().then(function () {
     res.send('new post created')
   }).catch(function (errors) {
