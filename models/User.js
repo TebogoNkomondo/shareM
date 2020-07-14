@@ -2,9 +2,11 @@ const bycrypt = require('bcryptjs')
 const validator = require('validator')
 const md5 = require('md5')
 const usersCollection = require('../db').db().collection('users')
-const User = function (data) {
+const User = function (data, getAvatar) {
   this.data = data
   this.errors = []
+  if (getAvatar === undefined) { getAvatar = false }
+  if (getAvatar) { this.getAvatar() }
 }
 
 User.prototype.cleanUp = function () {

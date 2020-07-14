@@ -1,5 +1,7 @@
 const postsCollection = require('../db').db().collection('posts')
 const ObjectID = require('mongodb').ObjectID
+const user = require('./User')
+const User = require('./User')
 
 const Post = function (data, userId) {
   this.data = data
@@ -50,9 +52,29 @@ Post.findSingleById = (id) => {
       reject()
       return
     }
-    const post = await postsCollection.findOne({ _id: ObjectID(id) })
-    if (post) {
-      resolve(post)
+    const posts = await postsCollection.aggregate([
+      { $match: { _id: ObjectID(id) } },
+      { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'authorDocument' } },
+      {
+        $project: {
+          title: 1,
+          body: 1,
+          createdDate: 1,
+          author: { $arrayElemAt: ['$authorDocument', 0] }
+        }
+      }
+    ]).toArray()
+    // clean up author properties in each post object
+    posts.map((post) => {
+      post.author = {
+        username: post.author.username,
+        avatar: new User(post.author, true).avatar
+      }
+      return post
+    })
+
+    if (posts.length) {
+      resolve(posts[0])
     } else {
       reject()
     }
