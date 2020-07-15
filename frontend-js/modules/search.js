@@ -1,3 +1,4 @@
+import axios from 'axios'
 export default class Search {
   // select DOM elements and keep track of useful data
   constructor () {
@@ -5,6 +6,11 @@ export default class Search {
     this.headSearchIcon = document.querySelector('.header-search-icon')
     this.overlay = document.querySelector('.search-overlay')
     this.closeIcon = document.querySelector('.close-live-search')
+    this.inputField = document.querySelector('#live-search-field')
+    this.resultsArea = document.querySelector('.live-search-results')
+    this.loaderIcon = document.querySelector('.circle-loader')
+    this.typingWaitTImer
+    this.previousValue = ''
     this.events()
   }
 
@@ -15,15 +21,41 @@ export default class Search {
       this.openOverlay()
     })
     this.closeIcon.addEventListener('click', () => this.closeOverlay())
+    this.inputField.addEventListener('keyup', () => this.keyPressHandler())
   }
 
   // include methods
   openOverlay () {
     this.overlay.classList.add('search-overlay--visible')
+    setTimeout(() => this.inputField.focus(), 50)
   }
 
   closeOverlay () {
     this.overlay.classList.remove('search-overlay--visible')
+  }
+
+  keyPressHandler () {
+    const value = this.inputField.value
+
+    if (value != '' && value != this.previousValue) {
+      clearTimeout(this.typingWaitTimer)
+      this.showLoaderIcon()
+      this.typingWaitTimer = setTimeout(() => this.sendRequest(), 3000)
+    }
+
+    this.previousValue = value
+  }
+
+  sendRequest () {
+    axios.post('/search', { searchTerm: this.inputField.value }).then(() => {
+
+    }).catch(() => {
+      alert('request failed')
+    })
+  }
+
+  showLoaderIcon () {
+    this.loaderIcon.classList.add('circle-loader--visible')
   }
 
   injectHTM () {
@@ -40,7 +72,7 @@ export default class Search {
       <div class="search-overlay-bottom">
         <div class="container container--narrow py-3">
           <div class="circle-loader"></div>
-          <div class="live-search-results live-search-results--visible">
+          <div class="live-search-results >
             <div class="list-group shadow-sm">
               <div class="list-group-item active"><strong>Search Results</strong> (4 items found)</div>
   
