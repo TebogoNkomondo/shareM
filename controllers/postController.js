@@ -6,10 +6,14 @@ exports.viewCreateScreen = function (req, res) {
 
 exports.create = function (req, res) {
   const post = new Post(req.body, req.session.user._id)
-  post.create().then(function () {
-    res.send('New post created.')
+  post.create().then(function (newId) {
+    req.flash('success', 'New post successfully created')
+    req.session.save(() => {
+      res.redirect(`/post/${newId}`)
+    })
   }).catch(function (errors) {
-    res.send(errors)
+    errors.forEach(error => { req.flash('errors', error) })
+    req.session.save(() => { res.redirect('/create-post') })
   })
 }
 
