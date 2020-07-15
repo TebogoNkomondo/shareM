@@ -80,14 +80,14 @@ Post.reusablePostQuery = function (uniqueOperations, visitorId) {
     const aggOperations = uniqueOperations.concat([
       { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'authorDocument' } },
       {
- $project: {
-        title: 1,
-        body: 1,
-        createdDate: 1,
-        authorId: '$author',
-        author: { $arrayElemAt: ['$authorDocument', 0] }
+        $project: {
+          title: 1,
+          body: 1,
+          createdDate: 1,
+          authorId: '$author',
+          author: { $arrayElemAt: ['$authorDocument', 0] }
+        }
       }
- }
     ])
 
     let posts = await postsCollection.aggregate(aggOperations).toArray()
@@ -120,7 +120,6 @@ Post.findSingleById = function (id, visitorId) {
     ], visitorId)
 
     if (posts.length) {
-      console.log(posts[0])
       resolve(posts[0])
     } else {
       reject()
