@@ -1,11 +1,9 @@
 const express = require('express')
 const session = require('express-session')
-const app = express()
-const router = require('./router')
-const dotenv = require('dotenv')
 const MongoStore = require('connect-mongo')(session)
 const flash = require('connect-flash')
-
+const app = express()
+const dotenv = require('dotenv')
 dotenv.config()
 
 const sessionOptions = session({
@@ -19,21 +17,24 @@ const sessionOptions = session({
 app.use(sessionOptions)
 app.use(flash())
 
-app.use((req, res, next) => {
-  // make current user ID available on the request element
-  if (req.session.user) {
-    req.visitorID = req.session.user._id
-  } else {
-    req.visitorID = 0
-  }
+app.use(function (req, res, next) {
+  // make all error and success flash messages available from all templates
+  res.locals.errors = req.flash('errors')
+  res.locals.success = req.flash('success')
+
+  // make current user id available on the req object
+  if (req.session.user) { req.visitorId = req.session.user._id } else { req.visitorId = 0 }
 
   // make user session data available from within view templates
   res.locals.user = req.session.user
   next()
 })
 
+const router = require('./router')
+
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
+
 app.use(express.static('public'))
 app.set('views', 'views')
 app.set('view engine', 'ejs')
