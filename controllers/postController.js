@@ -1,5 +1,4 @@
 const Post = require('../models/Post')
-const User = require('../models/User')
 
 exports.viewCreateScreen = function (req, res) {
   res.render('create-post')
@@ -8,13 +7,11 @@ exports.viewCreateScreen = function (req, res) {
 exports.create = function (req, res) {
   const post = new Post(req.body, req.session.user._id)
   post.create().then(function (newId) {
-    req.flash('success', 'New post successfully created')
-    req.session.save(() => {
-      res.redirect(`/post/${newId}`)
-    })
+    req.flash('success', 'New post successfully created.')
+    req.session.save(() => res.redirect(`/post/${newId}`))
   }).catch(function (errors) {
-    errors.forEach(error => { req.flash('errors', error) })
-    req.session.save(() => { res.redirect('/create-post') })
+    errors.forEach(error => req.flash('errors', error))
+    req.session.save(() => res.redirect('/create-post'))
   })
 }
 
@@ -72,12 +69,18 @@ exports.edit = function (req, res) {
 
 exports.delete = function (req, res) {
   Post.delete(req.params.id, req.visitorId).then(() => {
-    req.flash('success', 'Post succesfully deleted')
-    req.session.save(() => {
-      res.redirect(`/profile/${req.session.user.username}`)
-    })
+    req.flash('success', 'Post successfully deleted.')
+    req.session.save(() => res.redirect(`/profile/${req.session.user.username}`))
   }).catch(() => {
-    req.flash('errors', 'You do not have permission to perform that action')
-    req.session.save(() => req.redirect('/'))
+    req.flash('errors', 'You do not have permission to perform that action.')
+    req.session.save(() => res.redirect('/'))
+  })
+}
+
+exports.search = function (req, res) {
+  Post.search(req.body.searchTerm).then(posts => {
+    res.json(posts)
+  }).catch(() => {
+    res.json([])
   })
 }
