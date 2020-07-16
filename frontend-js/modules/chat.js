@@ -37,6 +37,7 @@ export default class Chat {
     </div>
     <!-- end template-->
     `)
+    this.chatLog.scrollTop = this.chatLog.scrollHeight
     this.chatField.value = ''
     this.chatField.focus()
   }
@@ -72,6 +73,7 @@ export default class Chat {
       </div>
       <!-- end template-->
     `)
+    this.chatLog.scrollTop = this.chatLog.scrollHeight
   }
 
   hideChat () {
