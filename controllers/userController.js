@@ -2,6 +2,19 @@ const User = require('../models/User')
 const Post = require('../models/Post')
 const Follow = require('../models/Follow')
 
+exports.doesUsernameExist = function (req, res) {
+  User.findByUsername(req.body.username).then(function () {
+    res.json(true)
+  }).catch(function () {
+    res.json(false)
+  })
+}
+
+exports.doesEmailExist = async function (req, res) {
+  const emailBool = await User.doesEmailExist(req.body.email)
+  res.json(emailBool)
+}
+
 exports.sharedProfileData = async function (req, res, next) {
   let isVisitorsProfile = false
   let isFollowing = false
@@ -12,12 +25,12 @@ exports.sharedProfileData = async function (req, res, next) {
 
   req.isVisitorsProfile = isVisitorsProfile
   req.isFollowing = isFollowing
-  // retrieve posts, followers and following count
+  // retrieve post, follower, and following counts
   const postCountPromise = Post.countPostsByAuthor(req.profileUser._id)
-  const followersCountPromise = Follow.countFollwersById(req.profileUser._id)
-  const followingCountPromise = Follow.countFollwingById(req.profileUser._id)
+  const followerCountPromise = Follow.countFollowersById(req.profileUser._id)
+  const followingCountPromise = Follow.countFollowingById(req.profileUser._id)
+  const [postCount, followerCount, followingCount] = await Promise.all([postCountPromise, followerCountPromise, followingCountPromise])
 
-  const [postCount, followerCount, followingCount] = await Promise.all([postCountPromise, followersCountPromise, followingCountPromise])
   req.postCount = postCount
   req.followerCount = followerCount
   req.followingCount = followingCount
@@ -48,6 +61,15 @@ exports.login = function (req, res) {
     req.session.save(function () {
       res.redirect('/')
     })
+  })
+}
+
+exports.apiLogin = function (req, res) {
+  const user = new User(req.body)
+  user.login().then(function (result) {
+    res.json('Good job, that is a real username and password.')
+  }).catch(function (e) {
+    res.json('Sorry, your values are not correct.')
   })
 }
 
@@ -97,14 +119,14 @@ exports.profilePostsScreen = function (req, res) {
   // ask our post model for posts by a certain author id
   Post.findByAuthorId(req.profileUser._id).then(function (posts) {
     res.render('profile', {
+      title: `Profile for ${req.profileUser.username}`,
       currentPage: 'posts',
       posts: posts,
       profileUsername: req.profileUser.username,
       profileAvatar: req.profileUser.avatar,
       isFollowing: req.isFollowing,
       isVisitorsProfile: req.isVisitorsProfile,
-      counts: { postCount: req.postCount, followerCount: req.followerCount, followingCount: req.followingCount },
-      title: `Profile for ${req.profileUser.username}`
+      counts: { postCount: req.postCount, followerCount: req.followerCount, followingCount: req.followingCount }
     })
   }).catch(function () {
     res.render('404')
@@ -143,17 +165,4 @@ exports.profileFollowingScreen = async function (req, res) {
   } catch {
     res.render('404')
   }
-}
-
-exports.doesUserNameExist = function (req, res) {
-  User.findByUsername(req.body.username).then(() => {
-    res.json(true)
-  }).catch(() => {
-    res.json(false)
-  })
-}
-
-exports.doesEmailExist = async function (req, res) {
-  const emailBool = await User.doesEmailExist(req.body.email)
-  res.json(emailBool)
 }
