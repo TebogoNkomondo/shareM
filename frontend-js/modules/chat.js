@@ -1,21 +1,51 @@
 export default class Chat {
   constructor () {
+    this.openedYet = false
     this.chatWrapper = document.querySelector('#chat-wrapper')
     this.openIcon = document.querySelector('.header-chat-icon')
     this.injectHTML()
+    this.chatLog = document.querySelector('#chat')
+    this.chatField = document.querySelector('#chatField')
+    this.chatForm = document.querySelector('#chatForm')
     this.closeIcon = document.querySelector('.chat-title-bar-close')
     this.events()
   }
 
   // events
   events () {
+    this.chatForm.addEventListener('submit', (e) => {
+      e.preventDefault()
+      this.sendMessageToServer()
+    })
     this.openIcon.addEventListener('click', () => { this.showChat() })
     this.closeIcon.addEventListener('click', () => this.hideChat())
   }
 
   // methods
+
+  sendMessageToServer () {
+    this.socket.emit('chatMessageFromBrowser', { message: this.chatField.value })
+    this.chatField.value = ''
+    this.chatField.focus()
+  }
+
   showChat () {
+    if (!this.openedYet) {
+      this.openConnection()
+    }
+    this.openedYet = true
     this.chatWrapper.classList.add('chat--visible')
+  }
+
+  openConnection () {
+    this.socket = io()
+    this.socket.on('chatMessageFromServer', (data) => {
+      this.displayMessageFromServer(data)
+    })
+  }
+
+  displayMessageFromServer (data) {
+    this.chatLog.insertAdjacentHTML('beforeend', `<p>${data.message} </p>`)
   }
 
   hideChat () {
