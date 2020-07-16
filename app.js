@@ -37,6 +37,7 @@ app.use(function (req, res, next) {
 })
 
 const router = require('./router')
+const { SIGCHLD } = require('constants')
 
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
@@ -58,6 +59,9 @@ io.use(function (socket, next) {
 io.on('connection', (socket) => {
   if (socket.request.session.user) {
     const user = socket.request.session.user
+
+    socket.emit('welcome', { username: user.username, avatar: user.avatar })
+
     socket.on('chatMessageFromBrowser', (data) => {
       socket.broadcast.emit('chatMessageFromServer', { message: data.message, username: user.username, avatar: user.avatar })
     })
