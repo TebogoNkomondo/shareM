@@ -3,13 +3,12 @@ const session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
 const flash = require('connect-flash')
 const markdown = require('marked')
-const sanitizeHTML = require('sanitize-html')
+const csrf = require('csurf')
 const app = express()
-const dotenv = require('dotenv')
-dotenv.config()
+const sanitizeHTML = require('sanitize-html')
 
 const sessionOptions = session({
-  secret: process.env.SECRET,
+  secret: 'JavaScript is sooooooooo coool',
   store: new MongoStore({ client: require('./db') }),
   resave: false,
   saveUninitialized: false,
@@ -20,10 +19,11 @@ app.use(sessionOptions)
 app.use(flash())
 
 app.use(function (req, res, next) {
-  // make markdown function available in ejs templates
+  // make our markdown function available from within ejs templates
   res.locals.filterUserHTML = function (content) {
-    return sanitizeHTML(markdown(content), { allowedTags: ['p', 'br', 'li', 'ul', 'strong', 'bold', 'i', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'em'], allowedAttributes: [] })
+    return sanitizeHTML(markdown(content), { allowedTags: ['p', 'br', 'ul', 'ol', 'li', 'strong', 'bold', 'i', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'], allowedAttributes: {} })
   }
+
   // make all error and success flash messages available from all templates
   res.locals.errors = req.flash('errors')
   res.locals.success = req.flash('success')
@@ -37,7 +37,6 @@ app.use(function (req, res, next) {
 })
 
 const router = require('./router')
-const { SIGCHLD } = require('constants')
 
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
@@ -46,10 +45,27 @@ app.use(express.static('public'))
 app.set('views', 'views')
 app.set('view engine', 'ejs')
 
+app.use(csrf())
+
+app.use(function (req, res, next) {
+  res.locals.csrfToken = req.csrfToken()
+  next()
+})
+
 app.use('/', router)
 
-const server = require('http').createServer(app)
+app.use(function (err, req, res, next) {
+  if (err) {
+    if (err.code == 'EBADCSRFTOKEN') {
+      req.flash('errors', 'Cross site request forgery detected.')
+      req.session.save(() => res.redirect('/'))
+    } else {
+      res.render('404')
+    }
+  }
+})
 
+const server = require('http').createServer(app)
 const io = require('socket.io')(server)
 
 io.use(function (socket, next) {
