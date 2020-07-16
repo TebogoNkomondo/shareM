@@ -45,7 +45,17 @@ export default class Chat {
   }
 
   displayMessageFromServer (data) {
-    this.chatLog.insertAdjacentHTML('beforeend', `<p>${data.message} </p>`)
+    this.chatLog.insertAdjacentHTML('beforeend', `
+    <!-- template for messages from others -->
+      <div class="chat-other">
+        <a href="#"><img class="avatar-tiny" src="${data.avatar}"></a>
+        <div class="chat-message"><div class="chat-message-inner">
+          <a href="#"><strong>${data.username}:</strong></a>
+          ${data.message}
+        </div></div>
+      </div>
+      <!-- end template-->
+    `)
   }
 
   hideChat () {
