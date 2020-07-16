@@ -76,11 +76,11 @@ Follow.getFollowersById = function (id) {
         { $match: { followedId: id } },
         { $lookup: { from: 'users', localField: 'authorId', foreignField: '_id', as: 'userDoc' } },
         {
-          $project: {
-            username: { $arrayElemAt: ['$userDoc.username', 0] },
-            email: { $arrayElemAt: ['$userDoc.email', 0] }
-          }
+ $project: {
+          username: { $arrayElemAt: ['$userDoc.username', 0] },
+          email: { $arrayElemAt: ['$userDoc.email', 0] }
         }
+ }
       ]).toArray()
       followers = followers.map(function (follower) {
         const user = new User(follower, true)
@@ -100,11 +100,11 @@ Follow.getFollowingById = function (id) {
         { $match: { authorId: id } },
         { $lookup: { from: 'users', localField: 'followedId', foreignField: '_id', as: 'userDoc' } },
         {
-          $project: {
-            username: { $arrayElemAt: ['$userDoc.username', 0] },
-            email: { $arrayElemAt: ['$userDoc.email', 0] }
-          }
+ $project: {
+          username: { $arrayElemAt: ['$userDoc.username', 0] },
+          email: { $arrayElemAt: ['$userDoc.email', 0] }
         }
+ }
       ]).toArray()
       followers = followers.map(function (follower) {
         const user = new User(follower, true)

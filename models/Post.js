@@ -82,14 +82,14 @@ Post.reusablePostQuery = function (uniqueOperations, visitorId) {
     const aggOperations = uniqueOperations.concat([
       { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'authorDocument' } },
       {
-        $project: {
-          title: 1,
-          body: 1,
-          createdDate: 1,
-          authorId: '$author',
-          author: { $arrayElemAt: ['$authorDocument', 0] }
-        }
+ $project: {
+        title: 1,
+        body: 1,
+        createdDate: 1,
+        authorId: '$author',
+        author: { $arrayElemAt: ['$authorDocument', 0] }
       }
+ }
     ])
 
     let posts = await postsCollection.aggregate(aggOperations).toArray()
@@ -175,12 +175,13 @@ Post.countPostsByAuthor = function (id) {
 }
 
 Post.getFeed = async function (id) {
-  // create array of user IDs that the user follows
-  let followedUsers = await followsCollection.find({ authorId: ObjectID(id) }).toArray()
-  followedUsers = followedUsers.map((followDoc) => {
+  // create an array of the user ids that the current user follows
+  let followedUsers = await followsCollection.find({ authorId: new ObjectID(id) }).toArray()
+  followedUsers = followedUsers.map(function (followDoc) {
     return followDoc.followedId
   })
-  // look for posts where the author is in the array of followed users
+
+  // look for posts where the author is in the above array of followed users
   return Post.reusablePostQuery([
     { $match: { author: { $in: followedUsers } } },
     { $sort: { createdDate: -1 } }
