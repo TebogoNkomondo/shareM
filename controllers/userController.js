@@ -144,3 +144,16 @@ exports.profileFollowingScreen = async function (req, res) {
     res.render('404')
   }
 }
+
+exports.doesUserNameExist = function (req, res) {
+  User.findByUsername(req.body.username).then(() => {
+    res.json(true)
+  }).catch(() => {
+    res.json(false)
+  })
+}
+
+exports.doesEmailExist = async function (req, res) {
+  const emailBool = await User.doesEmailExist(req.body.email)
+  res.json(emailBool)
+}
