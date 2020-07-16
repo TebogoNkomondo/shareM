@@ -1,6 +1,9 @@
 const User = require('../models/User')
 const Post = require('../models/Post')
 const Follow = require('../models/Follow')
+const jwt = require('jsonwebtoken')
+const dotenv = require('dotenv')
+dotenv.config()
 
 exports.doesUsernameExist = function (req, res) {
   User.findByUsername(req.body.username).then(function () {
@@ -67,7 +70,7 @@ exports.login = function (req, res) {
 exports.apiLogin = function (req, res) {
   const user = new User(req.body)
   user.login().then(function (result) {
-    res.json('Good job, that is a real username and password.')
+    res.json(jwt.sign({ _id: user.data._id }, process.env.JWTSECRET, { expiresIn: '30m' }))
   }).catch(function (e) {
     res.json('Sorry, your values are not correct.')
   })
@@ -164,5 +167,14 @@ exports.profileFollowingScreen = async function (req, res) {
     })
   } catch {
     res.render('404')
+  }
+}
+
+exports.apiMustBeLoggedIn = function (req, res, next) {
+  try {
+    req.apiUser = jwt.verify(req.body.token, process.env.JWTSECRET)
+    next()
+  } catch {
+    res.json('sorry, you must provide a valid token')
   }
 }

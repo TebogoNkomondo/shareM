@@ -84,3 +84,12 @@ exports.search = function (req, res) {
     res.json([])
   })
 }
+
+exports.apiCreate = function (req, res) {
+  const post = new Post(req.body, req.apiUser._id)
+  post.create().then(function (newId) {
+    res.json('successfully created post from API')
+  }).catch(function (errors) {
+    res.json(errors)
+  })
+}
