@@ -59,7 +59,7 @@ io.on('connection', (socket) => {
   if (socket.request.session.user) {
     const user = socket.request.session.user
     socket.on('chatMessageFromBrowser', (data) => {
-      io.emit('chatMessageFromServer', { message: data.message, username: user.username, avatar: user.avatar })
+      socket.broadcast.emit('chatMessageFromServer', { message: data.message, username: user.username, avatar: user.avatar })
     })
   }
 })
