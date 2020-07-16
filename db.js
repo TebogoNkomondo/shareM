@@ -4,7 +4,7 @@ dotenv.config()
 
 let port = process.env.PORT
 if (port == null || '') {
-  port = process.env.PORT
+  port = 3000
 }
 
 mongodb.connect(process.env.CONNECTIONSTRING, { useNewUrlParser: true, useUnifiedTopology: true }, (err, client) => {
