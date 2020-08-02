@@ -1,6 +1,6 @@
 # shareM
 
-- ShareM is an online blogging platform.
+- ShareM is an online blogging platform that was developed on Javascript, HTML and CSS. User data is stored on a MongoDB database.
 
 ### Features
 - Personal account creation.
