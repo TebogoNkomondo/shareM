@@ -11,6 +11,7 @@
 - SocketIO based chat section.
 - Security from Cross Site Request Forgery (CSRF) attacks.
 - Integration with Postman API.
+- Cookies that expire after 24 hours.
 
 ### Profile Pictures
 
